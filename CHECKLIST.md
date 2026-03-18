@@ -58,6 +58,45 @@
 - [x] Cross-promotion — generate natural promo comments and tweets (src/cross_promotion.py)
 - [x] Revenue tracking — CPM-based revenue estimation in analytics (src/analytics.py)
 
+## High Impact Features (Completed)
+
+- [x] Auto-reply bot — reply to YouTube comments to boost engagement (src/auto_reply.py)
+- [x] Competitor analysis — scrape competitors' top videos, reverse-engineer patterns (src/competitor_analysis.py)
+- [x] Viral score predictor — score video ideas before generating, save API calls (src/viral_predictor.py)
+- [x] Auto-repurpose — chop long videos into multiple shorts automatically (src/auto_repurpose.py)
+- [x] Voiceover cloning — voice style matching with 40+ Edge-TTS voices (src/voice_cloner.py)
+- [x] Background video loops — ambient videos instead of static images (src/video_backgrounds.py)
+- [x] Music matching — auto-select background music mood based on content (src/music_matcher.py)
+- [x] Batch generation — generate 10-50 videos in one command (src/batch_generator.py)
+- [x] Email list builder — CTA in descriptions, track subscriber growth (src/email_list_builder.py)
+- [x] Monetization checker — check platform requirements with progress tracking (src/monetization_checker.py)
+
+## Medium Impact Features (Completed)
+
+- [x] AI face/avatar — D-ID + SadTalker integration with overlay support (src/ai_avatar.py)
+- [x] Split testing uploads — A/B test titles/thumbnails, track winners (src/split_testing.py)
+- [x] Posting analytics — track best posting times based on YOUR data (src/posting_analytics.py)
+- [x] Auto-hashtag research — LLM + niche database for optimal hashtags (src/hashtag_research.py)
+- [x] Video series — generate connected multi-part series with cliffhangers (src/video_series.py)
+- [x] Watermark/branding — logo + text overlay on every video (src/watermark.py)
+- [x] Caption styles — karaoke, bounce, typewriter, fade, highlight box (src/caption_styles.py)
+- [x] Multi-language dub — translate + dub in 20 languages via Edge-TTS (src/multi_language.py)
+- [x] Shorts to longform — compile shorts into 10+ min videos with intro/outro (src/shorts_to_longform.py)
+- [x] Reddit scraper — scrape 14 niche subreddits for content ideas (src/reddit_scraper.py)
+
+## Nice to Have Features (Pending)
+
+- [ ] Telegram bot control — control everything via Telegram commands
+- [ ] Mobile app — trigger generation from phone
+- [ ] Proxy support — rotate proxies for Selenium
+- [ ] Account warmup — gradually increase posting frequency
+- [ ] Plagiarism check — ensure scripts aren't too similar to existing content
+- [ ] Auto-pin comment — pin promotional comment on uploaded video
+- [ ] Scheduler calendar UI — visual drag-and-drop calendar in dashboard
+- [ ] Revenue dashboard — pull real YouTube/TikTok analytics via API
+- [ ] Multi-user support — multiple users with separate configs
+- [ ] Plugin system — let others write plugins for new platforms
+
 ## File Map
 
 ### New Directories
@@ -89,6 +128,26 @@
 | instagram_uploader.py | Instagram Reels Selenium upload |
 | multi_platform.py | Multi-platform upload orchestrator |
 | dashboard.py | Streamlit web dashboard |
+| auto_reply.py | YouTube comment auto-reply bot |
+| competitor_analysis.py | Competitor video pattern analysis |
+| viral_predictor.py | Viral score prediction for video ideas |
+| auto_repurpose.py | Long video to shorts chopper |
+| voice_cloner.py | Voice style matching with Edge-TTS |
+| video_backgrounds.py | Ambient background video loops |
+| music_matcher.py | Content-based background music selection |
+| batch_generator.py | Bulk video generation (10-50 at once) |
+| email_list_builder.py | Email CTA and subscriber tracking |
+| monetization_checker.py | Platform monetization requirement checker |
+| watermark.py | Logo + text watermark branding |
+| reddit_scraper.py | Reddit content scraping (14 niches) |
+| multi_language.py | Multi-language dubbing (20 languages) |
+| video_series.py | Multi-part video series generator |
+| hashtag_research.py | Auto-hashtag research + trending |
+| caption_styles.py | 5 caption animation styles |
+| shorts_to_longform.py | Shorts compilation into longform |
+| split_testing.py | A/B split testing framework |
+| posting_analytics.py | Posting time + performance tracking |
+| ai_avatar.py | AI avatar (D-ID + SadTalker) |
 
 ### Modified Files
 | File | Changes |
