@@ -1,0 +1,12 @@
+{
+  "name": "Motivation",
+  "description": "Motivational and self-improvement content",
+  "niche": "motivational quotes and self-improvement tips",
+  "language": "English",
+  "tts_engine": "edge_tts",
+  "edge_tts_voice": "en-US-ChristopherNeural",
+  "video_transition": "zoom",
+  "transition_duration": 0.5,
+  "script_sentence_length": 4,
+  "background_music_enabled": true
+}

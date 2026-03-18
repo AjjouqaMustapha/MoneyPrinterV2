@@ -2,16 +2,42 @@
   "verbose": true,
   "firefox_profile": "",
   "headless": false,
+
+  "openrouter_api_key": "",
+  "openrouter_model": "meta-llama/llama-3.2-3b-instruct:free",
+
   "ollama_base_url": "http://127.0.0.1:11434",
   "ollama_model": "",
   "twitter_language": "English",
+
   "nanobanana2_api_base_url": "https://generativelanguage.googleapis.com/v1beta",
   "nanobanana2_api_key": "",
   "nanobanana2_model": "gemini-3.1-flash-image-preview",
   "nanobanana2_aspect_ratio": "9:16",
+
+  "tts_engine": "edge_tts",
+  "tts_voice": "Jasper",
+  "edge_tts_voice": "en-US-ChristopherNeural",
+
+  "video_transition": "fade",
+  "transition_duration": 0.5,
+  "background_music_enabled": true,
+
   "threads": 2,
   "zip_url": "",
   "is_for_kids": false,
+
+  "groq_api_key": "",
+  "pexels_api_key": "",
+
+  "timezone": "UTC",
+
+  "discord_webhook_url": "",
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+
+  "upload_platforms": ["youtube"],
+
   "google_maps_scraper": "https://github.com/gosom/google-maps-scraper/archive/refs/tags/v0.9.7.zip",
   "email": {
     "smtp_server": "smtp.gmail.com",
@@ -23,12 +49,13 @@
   "scraper_timeout": 300,
   "outreach_message_subject": "I have a question...",
   "outreach_message_body_file": "outreach_message.html",
+
   "stt_provider": "local_whisper",
   "whisper_model": "base",
   "whisper_device": "auto",
   "whisper_compute_type": "int8",
   "assembly_ai_api_key": "",
-  "tts_voice": "Jasper",
+
   "font": "bold_font.ttf",
   "imagemagick_path": "Path to magick.exe or on linux/macOS just /usr/bin/convert",
   "script_sentence_length": 4

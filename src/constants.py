@@ -8,8 +8,23 @@ TWITTER_POST_BUTTON_XPATH = "/html/body/div[1]/div/div/div[2]/main/div/div/div/d
 OPTIONS = [
     "YouTube Shorts Automation",
     "Twitter Bot",
+    "TikTok Bot",
     "Affiliate Marketing",
     "Outreach",
+    "Quit"
+]
+
+TIKTOK_OPTIONS = [
+    "Generate & Upload Video",
+    "Show all Videos",
+    "Setup CRON Job",
+    "Quit"
+]
+
+TIKTOK_CRON_OPTIONS = [
+    "Once a day",
+    "Twice a day",
+    "Thrice a day",
     "Quit"
 ]
 

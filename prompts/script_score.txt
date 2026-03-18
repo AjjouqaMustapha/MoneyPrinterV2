@@ -1,0 +1,20 @@
+Rate the following YouTube Short script on a scale of 1-10 for:
+- engagement: how likely viewers will watch till the end
+- clarity: how clear and easy to understand
+- hook: how strong the opening line is
+- overall: overall quality score
+
+Script: {script}
+Topic: {subject}
+
+If the overall score is below 7, also provide an "improved_script" with a better version.
+
+Return a JSON object with:
+- "engagement": number 1-10
+- "clarity": number 1-10
+- "hook": number 1-10
+- "overall": number 1-10
+- "improved_script": string (only if overall < 7, otherwise null)
+- "feedback": one sentence explaining the score
+
+YOU MUST ONLY RETURN VALID JSON.

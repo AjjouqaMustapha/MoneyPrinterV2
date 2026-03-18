@@ -1,0 +1,9 @@
+Generate 3 different attention-grabbing opening hooks for a YouTube Short about: {subject}.
+Each hook should be one sentence, designed to stop viewers from scrolling.
+Use techniques like: surprising facts, questions, bold claims, or emotional triggers.
+
+Return a JSON object with:
+- "hooks": an array of 3 hook strings
+- "best_index": the index (0-2) of the most engaging hook
+
+YOU MUST ONLY RETURN VALID JSON.

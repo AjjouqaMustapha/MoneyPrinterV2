@@ -1,0 +1,10 @@
+Generate SEO-optimized YouTube tags for a video about: {subject}.
+Return a JSON object with:
+- "tags": an array of 10-15 relevant tags (mix of broad and specific)
+- "optimized_title": the same title but SEO-optimized (under 100 chars)
+- "optimized_description": an SEO-optimized description with relevant keywords
+
+Current title: {title}
+Current description: {description}
+
+YOU MUST ONLY RETURN VALID JSON. NO MARKDOWN CODE FENCES.

@@ -1,0 +1,12 @@
+{
+  "name": "Fun Facts",
+  "description": "Interesting and surprising facts about various topics",
+  "niche": "surprising and mind-blowing facts",
+  "language": "English",
+  "tts_engine": "edge_tts",
+  "edge_tts_voice": "en-US-JennyNeural",
+  "video_transition": "slide",
+  "transition_duration": 0.4,
+  "script_sentence_length": 4,
+  "background_music_enabled": true
+}

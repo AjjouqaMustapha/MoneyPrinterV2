@@ -1,0 +1,12 @@
+{
+  "name": "Tech Tips",
+  "description": "Technology tips, tricks, and product reviews",
+  "niche": "technology tips and hidden features of popular apps",
+  "language": "English",
+  "tts_engine": "edge_tts",
+  "edge_tts_voice": "en-US-DavisNeural",
+  "video_transition": "slide",
+  "transition_duration": 0.4,
+  "script_sentence_length": 4,
+  "background_music_enabled": false
+}

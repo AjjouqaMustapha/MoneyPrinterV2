@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  moneyprinter:
+    build: .
+    container_name: moneyprinter-v2
+    volumes:
+      - ./config.json:/app/config.json
+      - ./.mp:/app/.mp
+      - ./Songs:/app/Songs
+      - ./fonts:/app/fonts
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+    stdin_open: true
+    tty: true
+
+  dashboard:
+    build: .
+    container_name: moneyprinter-dashboard
+    command: streamlit run src/dashboard.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./config.json:/app/config.json
+      - ./.mp:/app/.mp
+      - ./Songs:/app/Songs
+      - ./fonts:/app/fonts
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}

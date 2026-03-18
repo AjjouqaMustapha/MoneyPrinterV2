@@ -1,0 +1,10 @@
+Generate content for a YouTube Short video about the niche: {niche}.
+Language: {language}
+Return a JSON object with these exact keys:
+- "topic": a specific video idea (one sentence)
+- "script": a video script in exactly {sentence_length} short sentences. No markdown, no formatting, no titles. Get straight to the point. Write in {language}.
+- "title": a YouTube title under 100 characters with hashtags
+- "description": a YouTube video description
+- "image_prompts": an array of {sentence_length} detailed image generation prompts, each a full sentence with emotional and interesting adjectives
+
+YOU MUST ONLY RETURN VALID JSON. NO MARKDOWN CODE FENCES. NO EXTRA TEXT.

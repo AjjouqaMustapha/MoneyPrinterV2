@@ -1,0 +1,12 @@
+{
+  "name": "Scary Stories",
+  "description": "Horror and creepy stories with dark imagery",
+  "niche": "scary stories and urban legends",
+  "language": "English",
+  "tts_engine": "edge_tts",
+  "edge_tts_voice": "en-US-GuyNeural",
+  "video_transition": "fade",
+  "transition_duration": 0.8,
+  "script_sentence_length": 5,
+  "background_music_enabled": true
+}

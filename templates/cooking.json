@@ -1,0 +1,12 @@
+{
+  "name": "Quick Recipes",
+  "description": "Quick and easy cooking recipes and food tips",
+  "niche": "quick and easy recipes and cooking hacks",
+  "language": "English",
+  "tts_engine": "edge_tts",
+  "edge_tts_voice": "en-US-AriaNeural",
+  "video_transition": "fade",
+  "transition_duration": 0.5,
+  "script_sentence_length": 4,
+  "background_music_enabled": true
+}

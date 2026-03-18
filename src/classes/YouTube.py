@@ -6,10 +6,11 @@ import os
 import requests
 import assemblyai as aai
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import *
 from cache import *
 from .Tts import TTS
-from llm_provider import generate_text
+from llm_provider import generate_text, generate_structured
 from config import *
 from status import *
 from uuid import uuid4
@@ -17,7 +18,7 @@ from constants import *
 from typing import List
 from moviepy.editor import *
 from termcolor import colored
-from selenium_firefox import *
+# selenium_firefox removed — not needed with modern Selenium 4+
 from selenium import webdriver
 from moviepy.video.fx.all import crop
 from moviepy.config import change_settings
@@ -131,6 +132,78 @@ class YouTube:
         """
         return generate_text(prompt, model_name=model_name)
 
+    def generate_all_content(self) -> dict:
+        """
+        Generates all video content (topic, script, metadata, image prompts) in a single
+        combined LLM call. Falls back to sequential individual calls on failure.
+
+        Returns:
+            content (dict): Dictionary with keys: topic, script, title, description, image_prompts
+        """
+        sentence_length = get_script_sentence_length()
+
+        prompt = f"""Generate content for a YouTube Short video about the niche: {self.niche}.
+Language: {self.language}
+Return a JSON object with these exact keys:
+- "topic": a specific video idea (one sentence)
+- "script": a video script in exactly {sentence_length} short sentences. No markdown, no formatting, no titles. Get straight to the point. Write in {self.language}.
+- "title": a YouTube title under 100 characters with hashtags
+- "description": a YouTube video description
+- "image_prompts": an array of {sentence_length} detailed image generation prompts, each a full sentence with emotional and interesting adjectives
+
+YOU MUST ONLY RETURN VALID JSON. NO MARKDOWN CODE FENCES. NO EXTRA TEXT."""
+
+        try:
+            result = generate_structured(prompt)
+
+            if isinstance(result, str):
+                result = result.replace("```json", "").replace("```", "").strip()
+                result = json.loads(result)
+
+            # Validate required keys
+            required_keys = ["topic", "script", "title", "description", "image_prompts"]
+            for key in required_keys:
+                if key not in result:
+                    raise ValueError(f"Missing required key in combined response: {key}")
+
+            if len(result["title"]) > 100:
+                raise ValueError("Generated title exceeds 100 characters.")
+
+            if len(result["script"]) > 5000:
+                raise ValueError("Generated script is too long.")
+
+            # Clean the script
+            result["script"] = re.sub(r"\*", "", result["script"])
+
+            # Set all attributes from the combined result
+            self.subject = result["topic"]
+            self.script = result["script"]
+            self.metadata = {
+                "title": result["title"],
+                "description": result["description"],
+            }
+            self.image_prompts = result["image_prompts"]
+
+            success(f"Generated all content in a single LLM call.")
+            success(f"Generated {len(self.image_prompts)} Image Prompts.")
+
+            return result
+
+        except Exception as e:
+            warning(f"Combined LLM call failed ({e}), falling back to sequential calls...")
+            # Fall back to sequential individual calls
+            self.generate_topic()
+            self.generate_script()
+            self.generate_metadata()
+            self.generate_prompts()
+            return {
+                "topic": self.subject,
+                "script": self.script,
+                "title": self.metadata["title"],
+                "description": self.metadata["description"],
+                "image_prompts": self.image_prompts,
+            }
+
     def generate_topic(self) -> str:
         """
         Generates a topic based on the YouTube Channel niche.
@@ -170,12 +243,12 @@ class YouTube:
         Get straight to the point, don't start with unnecessary things like, "welcome to this video".
 
         Obviously, the script should be related to the subject of the video.
-        
+
         YOU MUST NOT EXCEED THE {sentence_length} SENTENCES LIMIT. MAKE SURE THE {sentence_length} SENTENCES ARE SHORT.
         YOU MUST NOT INCLUDE ANY TYPE OF MARKDOWN OR FORMATTING IN THE SCRIPT, NEVER USE A TITLE.
         YOU MUST WRITE THE SCRIPT IN THE LANGUAGE SPECIFIED IN [LANGUAGE].
         ONLY RETURN THE RAW CONTENT OF THE SCRIPT. DO NOT INCLUDE "VOICEOVER", "NARRATOR" OR SIMILAR INDICATORS OF WHAT SHOULD BE SPOKEN AT THE BEGINNING OF EACH PARAGRAPH OR LINE. YOU MUST NOT MENTION THE PROMPT, OR ANYTHING ABOUT THE SCRIPT ITSELF. ALSO, NEVER TALK ABOUT THE AMOUNT OF PARAGRAPHS OR LINES. JUST WRITE THE SCRIPT
-        
+
         Subject: {self.subject}
         Language: {self.language}
         """
@@ -399,7 +472,10 @@ class YouTube:
         Returns:
             path_to_wav (str): Path to generated audio (WAV Format).
         """
-        path = os.path.join(ROOT_DIR, ".mp", str(uuid4()) + ".wav")
+        # Determine file extension based on TTS engine
+        tts_engine = get_tts_engine()
+        ext = ".mp3" if tts_engine == "edge_tts" else ".wav"
+        path = os.path.join(ROOT_DIR, ".mp", str(uuid4()) + ext)
 
         # Clean script, remove every character that is not a word character, a space, a period, a question mark, or an exclamation mark.
         self.script = re.sub(r"[^\w\s.?!]", "", self.script)
@@ -458,6 +534,9 @@ class YouTube:
 
         if provider == "third_party_assemblyai":
             return self.generate_subtitles_assemblyai(audio_path)
+
+        if provider == "groq_whisper":
+            return self.generate_subtitles_groq(audio_path)
 
         warning(f"Unknown stt_provider '{provider}'. Falling back to local_whisper.")
         return self.generate_subtitles_local_whisper(audio_path)
@@ -549,6 +628,65 @@ class YouTube:
 
         return srt_path
 
+    def generate_subtitles_groq(self, audio_path: str) -> str:
+        """
+        Generates subtitles using the Groq Whisper API.
+
+        Args:
+            audio_path (str): Audio file path
+
+        Returns:
+            path (str): Path to SRT file
+        """
+        groq_api_key = get_groq_api_key()
+        if not groq_api_key:
+            error("Groq API key is not configured. Set groq_api_key in config.json or GROQ_API_KEY env var.")
+            raise ValueError("Missing Groq API key")
+
+        url = "https://api.groq.com/openai/v1/audio/transcriptions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+        }
+
+        with open(audio_path, "rb") as audio_file:
+            files = {
+                "file": (os.path.basename(audio_path), audio_file),
+            }
+            data = {
+                "model": "whisper-large-v3",
+                "response_format": "verbose_json",
+            }
+
+            response = requests.post(url, headers=headers, files=files, data=data, timeout=300)
+            response.raise_for_status()
+
+        result = response.json()
+        segments = result.get("segments", [])
+
+        lines = []
+        for idx, segment in enumerate(segments, start=1):
+            start = self._format_srt_timestamp(segment["start"])
+            end = self._format_srt_timestamp(segment["end"])
+            text = segment.get("text", "").strip()
+
+            if not text:
+                continue
+
+            lines.append(str(idx))
+            lines.append(f"{start} --> {end}")
+            lines.append(text)
+            lines.append("")
+
+        subtitles = "\n".join(lines)
+        srt_path = os.path.join(ROOT_DIR, ".mp", str(uuid4()) + ".srt")
+        with open(srt_path, "w", encoding="utf-8") as file:
+            file.write(subtitles)
+
+        if get_verbose():
+            info(f" => Generated subtitles via Groq Whisper API: {srt_path}")
+
+        return srt_path
+
     def combine(self) -> str:
         """
         Combines everything into the final video.
@@ -561,6 +699,10 @@ class YouTube:
         tts_clip = AudioFileClip(self.tts_path)
         max_duration = tts_clip.duration
         req_dur = max_duration / len(self.images)
+
+        # Read transition settings from config
+        transition = get_video_transition()
+        transition_duration = get_transition_duration()
 
         # Make a generator that returns a TextClip when called with consecutive
         generator = lambda txt: TextClip(
@@ -609,15 +751,23 @@ class YouTube:
                     )
                 clip = clip.resize((1080, 1920))
 
-                # FX (Fade In)
-                # clip = clip.fadein(2)
+                # Apply transition effects
+                if transition == "fade" and len(clips) > 0:
+                    clip = clip.crossfadein(transition_duration)
+                elif transition == "zoom":
+                    clip = clip.resize(lambda t: 1 + 0.03 * t)
+                    clip = clip.resize((1080, 1920))
+                elif transition == "slide" and len(clips) > 0:
+                    dur = transition_duration
+                    clip = clip.set_position(
+                        lambda t: (max(0, 1080 - 1080 * t / dur), 0)
+                    )
 
                 clips.append(clip)
                 tot_dur += clip.duration
 
         final_clip = concatenate_videoclips(clips)
         final_clip = final_clip.set_fps(30)
-        random_song = choose_random_song()
 
         subtitles = None
         try:
@@ -628,11 +778,14 @@ class YouTube:
         except Exception as e:
             warning(f"Failed to generate subtitles, continuing without subtitles: {e}")
 
-        random_song_clip = AudioFileClip(random_song).set_fps(44100)
-
-        # Turn down volume
-        random_song_clip = random_song_clip.fx(afx.volumex, 0.1)
-        comp_audio = CompositeAudioClip([tts_clip.set_fps(44100), random_song_clip])
+        # Build audio: optionally mix in background music
+        if get_background_music_enabled():
+            random_song = choose_random_song()
+            random_song_clip = AudioFileClip(random_song).set_fps(44100)
+            random_song_clip = random_song_clip.fx(afx.volumex, 0.1)
+            comp_audio = CompositeAudioClip([tts_clip.set_fps(44100), random_song_clip])
+        else:
+            comp_audio = tts_clip.set_fps(44100)
 
         final_clip = final_clip.set_audio(comp_audio)
         final_clip = final_clip.set_duration(tts_clip.duration)
@@ -656,21 +809,15 @@ class YouTube:
         Returns:
             path (str): The path to the generated MP4 File.
         """
-        # Generate the Topic
-        self.generate_topic()
+        # Generate all content (topic, script, metadata, image prompts) in one combined LLM call
+        # Falls back to sequential calls if the combined call fails
+        self.generate_all_content()
 
-        # Generate the Script
-        self.generate_script()
-
-        # Generate the Metadata
-        self.generate_metadata()
-
-        # Generate the Image Prompts
-        self.generate_prompts()
-
-        # Generate the Images
-        for prompt in self.image_prompts:
-            self.generate_image(prompt)
+        # Generate the Images (in parallel)
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(self.generate_image, p): p for p in self.image_prompts}
+            for future in as_completed(futures):
+                future.result()  # raises if failed
 
         # Generate the TTS
         self.generate_script_to_speech(tts_instance)
@@ -848,7 +995,8 @@ class YouTube:
             driver.quit()
 
             return True
-        except:
+        except Exception as e:
+            error(f"Failed to upload video: {e}")
             self.browser.quit()
             return False
 
